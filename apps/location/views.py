@@ -1,14 +1,14 @@
 from rest_framework.viewsets import ModelViewSet
-from .models import Location, Region, LocationCategory
-from .serializers import LocationSerializer, RegionSerializer, LocationCategorySerializer
+from .models import Location, City, LocationCategory
+from .serializers import LocationSerializer, CitySerializer, LocationCategorySerializer
 
 class LocationViewSet(ModelViewSet):
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
 
-class RegionViewSet(ModelViewSet):
-    queryset = Region.objects.all()
-    serializer_class = RegionSerializer
+class CityViewSet(ModelViewSet):
+    queryset = City.objects.all()
+    serializer_class = CitySerializer
 
 class LocationCategoryViewSet(ModelViewSet):
     queryset = LocationCategory.objects.all()
