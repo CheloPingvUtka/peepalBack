@@ -1,0 +1,7 @@
+<!-- templates/authentication/activation_success.html -->
+<div class="alert alert-success">
+    <h4>Success!</h4>
+    <p>Your account has been successfully activated!</p>
+    <p>Welcome, {{ user.username }}!</p>
+    <a href="{% url 'home' %}" class="btn btn-primary">Go to Home</a>
+</div>
