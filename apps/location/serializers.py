@@ -1,21 +1,21 @@
 from rest_framework import serializers
-from .models import Location, City, LocationCategory
+from .models import Location, City, LocationCategory, LocationChange, Filter, LocationFilter
 from apps.user.models import User 
 
 class CitySerializer(serializers.ModelSerializer):
     class Meta:
         model = City
-        fields = ['id', 'city_name', 'latitude', 'longitude']
+        fields = '__all__'  
 
 class LocationCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = LocationCategory
-        fields = ['id', 'category_name']
+        fields = '__all__'  
 
 class UserShortSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email']
+        fields = ['id', 'username', 'email'] 
 
 class LocationSerializer(serializers.ModelSerializer):
     city = CitySerializer(read_only=True)
@@ -36,3 +36,18 @@ class LocationSerializer(serializers.ModelSerializer):
             'category', 'category_id',
             'user', 'user_id',
         ]
+
+class LocationChangeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LocationChange
+        fields = '__all__' 
+
+class FilterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Filter
+        fields = '__all__' 
+
+class LocationFilterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LocationFilter
+        fields = '__all__'  

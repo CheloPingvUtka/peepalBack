@@ -3,24 +3,29 @@ from .models import Location, City, LocationCategory, LocationChange, Filter, Lo
 
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('address', 'city', 'status', 'created_at')  # Поля для отображения в списке
+    search_fields = ('address', 'city__city_name')  # Поля для поиска
 
 @admin.register(City)
 class CityAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('city_name', 'latitude', 'longitude')
+    search_fields = ('city_name',)
 
 @admin.register(LocationCategory)
 class LocationCategoryAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('category_name',)
+    search_fields = ('category_name',)
 
 @admin.register(LocationChange)
 class LocationChangeAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('location', 'field_name', 'status', 'created_at')
+    search_fields = ('location__address', 'field_name')
 
 @admin.register(Filter)
 class FilterAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('filter_name', 'category')
+    search_fields = ('filter_name',)
 
 @admin.register(LocationFilter)
 class LocationFilterAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('location', 'filter')
