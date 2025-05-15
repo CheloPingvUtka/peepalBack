@@ -1,11 +1,7 @@
 from rest_framework import serializers
-from .models import Location, City, LocationCategory
+from .models import Location, LocationCategory
 from apps.user.models import User  # проверь, что путь правильный
 
-class CitySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = City
-        fields = ['id', 'city', 'latitude', 'longitude']
 
 class LocationCategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -18,8 +14,7 @@ class UserShortSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email']
 
 class LocationSerializer(serializers.ModelSerializer):
-    city = CitySerializer(read_only=True)
-    city_id = serializers.PrimaryKeyRelatedField(queryset=City.objects.all(), write_only=True)
+    city_name = serializers.CharField()
 
     category = LocationCategorySerializer(read_only=True)
     category_id = serializers.PrimaryKeyRelatedField(queryset=LocationCategory.objects.all(), write_only=True)
@@ -32,7 +27,7 @@ class LocationSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'address', 'description', 'status',
             'latitude', 'longitude', 'created_at', 'updated_at',
-            'city', 'city_id',
+            'city_name',
             'category', 'category_id',
             'user', 'user_id',
         ]

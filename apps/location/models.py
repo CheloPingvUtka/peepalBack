@@ -1,18 +1,6 @@
 from django.db import models
 
 
-class City(models.Model):
-    city = models.CharField(max_length=100, unique=True)
-    latitude = models.DecimalField(max_digits=9, decimal_places=6)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6)
-
-    def __str__(self):
-        return self.city
-    
-    class Meta:
-        db_table = "city"
-
-
 class LocationCategory(models.Model):
     category_name = models.CharField(max_length=100, unique=True)
 
@@ -30,9 +18,9 @@ class Location(models.Model):
         ('rejected', 'Rejected'),
     ]
 
-    city = models.ForeignKey(City, on_delete=models.CASCADE)
     user = models.ForeignKey('user.User', on_delete=models.CASCADE)
     category = models.ForeignKey(LocationCategory, on_delete=models.CASCADE)
+    city_name = models.CharField(max_length=100)
     address = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')

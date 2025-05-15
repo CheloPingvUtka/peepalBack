@@ -1,12 +1,8 @@
 from django.contrib import admin
-from .models import Location, City, LocationCategory, LocationChange, Filter, LocationFilter
+from .models import Location, LocationCategory, LocationChange, Filter, LocationFilter
 
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
-    pass
-
-@admin.register(City)
-class CityAdmin(admin.ModelAdmin):
     pass
 
 @admin.register(LocationCategory)
