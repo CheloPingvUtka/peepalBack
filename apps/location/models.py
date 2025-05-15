@@ -10,7 +10,6 @@ class LocationCategory(models.Model):
     class Meta:
         db_table = "location_category"
 
-
 class Location(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -18,8 +17,8 @@ class Location(models.Model):
         ('rejected', 'Rejected'),
     ]
 
-    user = models.ForeignKey('user.User', on_delete=models.CASCADE)
     category = models.ForeignKey(LocationCategory, on_delete=models.CASCADE)
+    user = models.ForeignKey('user.User', on_delete=models.CASCADE)
     city_name = models.CharField(max_length=100)
     address = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
@@ -49,7 +48,6 @@ class LocationChange(models.Model):
     old_value = models.JSONField()
     new_value = models.JSONField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    moderator = models.ForeignKey('user.User', on_delete=models.SET_NULL, null=True, related_name='moderator')
     moderator_comment = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     reviewed_at = models.DateTimeField(blank=True, null=True)

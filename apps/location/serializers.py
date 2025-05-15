@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Location, LocationCategory
+from .models import Location, LocationCategory, LocationChange, Filter, LocationFilter
 from apps.user.models import User  # проверь, что путь правильный
 
 
@@ -31,3 +31,18 @@ class LocationSerializer(serializers.ModelSerializer):
             'category', 'category_id',
             'user', 'user_id',
         ]
+
+class LocationChangeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LocationChange
+        fields = '__all__' 
+
+class FilterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Filter
+        fields = '__all__' 
+
+class LocationFilterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LocationFilter
+        fields = '__all__'  
