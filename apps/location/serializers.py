@@ -32,6 +32,18 @@ class LocationSerializer(serializers.ModelSerializer):
             'user', 'user_id',
         ]
 
+    def create(self, validated_data):
+        # Извлекаем category_id и user_id
+        category = validated_data.pop('category_id')
+        user = validated_data.pop('user_id')
+
+        location = Location.objects.create(
+            category=category,
+            user=user,
+            **validated_data
+        )
+        return location
+
 class LocationChangeSerializer(serializers.ModelSerializer):
     class Meta:
         model = LocationChange
