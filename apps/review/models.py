@@ -17,7 +17,11 @@ class Review(models.Model):
 class Photo(models.Model):
     location = models.ForeignKey('location.Location', on_delete=models.CASCADE)
     review = models.ForeignKey(Review, on_delete=models.CASCADE, blank=True, null=True)
-    photo_url = models.URLField()
+    image = models.ImageField(upload_to='photos/')
 
     class Meta:
         db_table = "photo"
+
+    @property
+    def photo_url(self):
+        return self.image.url

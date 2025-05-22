@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'apps.review',
     'apps.support',
     'apps.common',
+    'storages',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -56,6 +58,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -143,3 +147,20 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+]
+
+
+# Хранилище медиафайлов (фото и т.п.) через Yandex Object Storage
+AWS_ACCESS_KEY_ID = 'YCAJExk9xXDvXDmkenEmjHTPH'
+AWS_SECRET_ACCESS_KEY = 'YCMHozvO4G1p6WQnkGrwqdJoipYJ1bOVcUS6ZgaU'
+AWS_STORAGE_BUCKET_NAME = 'peepal'
+AWS_S3_REGION_NAME = 'ru-central1'
+AWS_S3_ENDPOINT_URL = 'https://storage.yandexcloud.net'
+
+# Настройки django-storages
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+AWS_QUERYSTRING_AUTH = False  # ссылки без временной подписи, публичные
