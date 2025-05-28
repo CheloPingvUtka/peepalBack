@@ -15,6 +15,7 @@ class UserShortSerializer(serializers.ModelSerializer):
 
 class LocationSerializer(serializers.ModelSerializer):
     city_name = serializers.CharField()
+    filters = serializers.PrimaryKeyRelatedField(queryset=Filter.objects.all(), many=True, write_only=True)
 
     category = LocationCategorySerializer(read_only=True)
     category_id = serializers.PrimaryKeyRelatedField(queryset=LocationCategory.objects.all(), write_only=True)
@@ -30,10 +31,12 @@ class LocationSerializer(serializers.ModelSerializer):
             'city_name',
             'category', 'category_id',
             'user', 'user_id',
+            'filters'
         ]
 
     def create(self, validated_data):
-        # Извлекаем category_id и user_id
+        # Извлекаем filters, category_id и user_id
+        filters = validated_data.pop('filters', [])
         category = validated_data.pop('category_id')
         user = validated_data.pop('user_id')
 
@@ -42,6 +45,10 @@ class LocationSerializer(serializers.ModelSerializer):
             user=user,
             **validated_data
         )
+
+        for f in filters:
+            LocationFilter.objects.create(location=location, filter=f)
+
         return location
 
 class LocationChangeSerializer(serializers.ModelSerializer):

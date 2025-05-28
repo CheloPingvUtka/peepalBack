@@ -18,6 +18,7 @@ class LocationChangeViewSet(ModelViewSet):
 class FilterViewSet(ModelViewSet):
     queryset = Filter.objects.all()
     serializer_class = FilterSerializer
+    
 
 class LocationFilterViewSet(ModelViewSet):
     queryset = LocationFilter.objects.all()
