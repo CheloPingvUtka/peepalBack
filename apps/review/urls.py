@@ -1,9 +1,11 @@
 from django.urls import path
-from .views import PhotoUploadView, PhotoListView, MultiPhotoUploadAPIView
+from .views import PhotoUploadView, PhotoListView, MultiPhotoUploadAPIView, ReviewCreateAPIView
 
 urlpatterns = [
     path('', PhotoListView.as_view(), name='photo-list'),
+    path('photos/', PhotoListView.as_view()),
     path('upload-photo/', PhotoUploadView.as_view(), name='upload-photo'),
     path('upload-multiple/', MultiPhotoUploadAPIView.as_view(), name='upload-multiple'),
+    path('create/', ReviewCreateAPIView.as_view(), name='review-create'),
 ]
 

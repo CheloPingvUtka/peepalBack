@@ -5,7 +5,16 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Photo
 from rest_framework import status
 from rest_framework.response import Response
-from .serializers import PhotoSerializer
+from .serializers import PhotoSerializer, ReviewSerializer
+
+
+class ReviewCreateAPIView(APIView):
+    def post(self, request):
+        serializer = ReviewSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
 
 
 class PhotoUploadView(APIView):
@@ -19,8 +28,14 @@ class PhotoUploadView(APIView):
         return Response(serializer.errors, status=400)
     
 class PhotoListView(ListAPIView):
-    queryset = Photo.objects.all()
     serializer_class = PhotoSerializer
+
+    def get_queryset(self):
+        queryset = Photo.objects.all()
+        location_id = self.request.query_params.get('location')
+        if location_id:
+            queryset = queryset.filter(location_id=location_id)
+        return queryset
 
 
 class MultiPhotoUploadAPIView(APIView):

@@ -15,7 +15,14 @@ class UserShortSerializer(serializers.ModelSerializer):
 
 class LocationSerializer(serializers.ModelSerializer):
     city_name = serializers.CharField()
-    filters = serializers.PrimaryKeyRelatedField(queryset=Filter.objects.all(), many=True, write_only=True)
+    rating = serializers.SerializerMethodField()
+    # READ-ONLY часть
+    filters = serializers.SerializerMethodField()
+
+    # WRITE-ONLY поля
+    filters_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Filter.objects.all(), many=True, write_only=True, source='filters'
+    )
 
     category = LocationCategorySerializer(read_only=True)
     category_id = serializers.PrimaryKeyRelatedField(queryset=LocationCategory.objects.all(), write_only=True)
@@ -31,8 +38,29 @@ class LocationSerializer(serializers.ModelSerializer):
             'city_name',
             'category', 'category_id',
             'user', 'user_id',
-            'filters'
+            'filters', 'filters_ids',
+            'rating',
         ]
+
+    def get_rating(self, obj):
+            from apps.review.models import Review
+            reviews = Review.objects.filter(location=obj)
+            if not reviews.exists():
+                return None
+            count = reviews.count()
+            return {
+                'total': round((
+                    sum(r.rating_clean + r.rating_access + (r.rating_other or 0) for r in reviews)
+                ) / (count * 3), 1),
+                'clean': round(sum(r.rating_clean for r in reviews) / count, 1),
+                'comfort': round(sum(r.rating_access for r in reviews) / count, 1),
+                'other': round(sum((r.rating_other or 0) for r in reviews) / count, 1),
+            }
+
+    def get_filters(self, obj):
+        return FilterShortSerializer(
+            Filter.objects.filter(locationfilter__location=obj), many=True
+        ).data
 
     def create(self, validated_data):
         # Извлекаем filters, category_id и user_id
@@ -65,3 +93,8 @@ class LocationFilterSerializer(serializers.ModelSerializer):
     class Meta:
         model = LocationFilter
         fields = '__all__'  
+
+class FilterShortSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Filter
+        fields = ['id', 'filter_name']

@@ -1,5 +1,11 @@
 from rest_framework import serializers
-from .models import Photo
+from .models import Photo, Review
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = ['id', 'location', 'user', 'rating_clean', 'rating_access', 'rating_other', 'text', 'created_at']
 
 
 class PhotoSerializer(serializers.ModelSerializer):

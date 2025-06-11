@@ -157,9 +157,10 @@ CORS_ALLOWED_ORIGINS = [
 # Хранилище медиафайлов (фото и т.п.) через Yandex Object Storage
 AWS_ACCESS_KEY_ID = 'YCAJExk9xXDvXDmkenEmjHTPH'
 AWS_SECRET_ACCESS_KEY = 'YCMHozvO4G1p6WQnkGrwqdJoipYJ1bOVcUS6ZgaU'
-AWS_STORAGE_BUCKET_NAME = 'peepal'
+AWS_STORAGE_BUCKET_NAME = 'peepal-public'
 AWS_S3_REGION_NAME = 'ru-central1'
 AWS_S3_ENDPOINT_URL = 'https://storage.yandexcloud.net'
+AWS_DEFAULT_ACL = 'public-read'
 
 # Настройки django-storages
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
