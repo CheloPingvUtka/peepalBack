@@ -3,9 +3,15 @@ from .models import Photo, Review, PresenceVote
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    user_name = serializers.CharField(source='user.username', read_only=True)
+
     class Meta:
         model = Review
-        fields = ['id', 'location', 'user', 'rating_clean', 'rating_access', 'rating_other', 'text', 'created_at']
+        fields = [
+            'id', 'location', 'user', 'user_name',
+            'rating_clean', 'rating_access', 'rating_other',
+            'text', 'created_at'
+        ]
 
     def validate(self, attrs):
         user = attrs.get('user')

@@ -6,6 +6,15 @@ from .models import Photo, PresenceVote
 from rest_framework import status
 from rest_framework.response import Response
 from .serializers import PhotoSerializer, ReviewSerializer, PresenceVoteSerializer
+from .models import Review
+from rest_framework.decorators import api_view
+from django.db.models import Prefetch
+
+@api_view(['GET'])
+def get_reviews_by_location(request, location_id):
+    reviews = Review.objects.filter(location_id=location_id).select_related('user')
+    serializer = ReviewSerializer(reviews, many=True)
+    return Response(serializer.data)
 
 
 class ReviewCreateAPIView(APIView):
