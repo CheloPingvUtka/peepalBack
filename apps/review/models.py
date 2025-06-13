@@ -12,6 +12,7 @@ class Review(models.Model):
 
     class Meta:
         db_table = "review"
+        unique_together = ('location', 'user')
 
 
 class Photo(models.Model):
