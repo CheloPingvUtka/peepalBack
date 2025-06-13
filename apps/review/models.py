@@ -25,3 +25,20 @@ class Photo(models.Model):
     @property
     def photo_url(self):
         return self.image.url
+    
+
+class PresenceVote(models.Model):
+    PRESENCE_CHOICES = [
+        ('present', 'Присутствует'),
+        ('absent', 'Отсутствует'),
+    ]
+
+    location = models.ForeignKey('location.Location', on_delete=models.CASCADE)
+    user = models.ForeignKey('user.User', on_delete=models.CASCADE)
+    vote = models.CharField(max_length=10, choices=PRESENCE_CHOICES)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "presence_vote"
+        unique_together = ('location', 'user')  # один голос на локацию от пользователя
+

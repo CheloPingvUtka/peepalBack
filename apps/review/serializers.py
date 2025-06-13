@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Photo, Review
+from .models import Photo, Review, PresenceVote
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -14,3 +14,10 @@ class PhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Photo
         fields = ['id', 'location', 'review', 'image', 'photo_url']
+
+
+class PresenceVoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PresenceVote
+        fields = ['location', 'user', 'vote']
+

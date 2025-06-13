@@ -2,10 +2,10 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.parsers import MultiPartParser, FormParser
-from .models import Photo
+from .models import Photo, PresenceVote
 from rest_framework import status
 from rest_framework.response import Response
-from .serializers import PhotoSerializer, ReviewSerializer
+from .serializers import PhotoSerializer, ReviewSerializer, PresenceVoteSerializer
 
 
 class ReviewCreateAPIView(APIView):
@@ -15,17 +15,39 @@ class ReviewCreateAPIView(APIView):
             serializer.save()
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
+    
 
-
-class PhotoUploadView(APIView):
-    parser_classes = [MultiPartParser]
-
+class PresenceVoteAPIView(APIView):
     def post(self, request):
-        serializer = PhotoSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=400)
+        location = request.data.get('location')
+        user = request.data.get('user')
+        vote = request.data.get('vote')
+
+        if vote not in ['present', 'absent']:
+            return Response({'error': 'Недопустимое значение vote'}, status=400)
+
+        existing_vote = PresenceVote.objects.filter(location_id=location, user_id=user).first()
+
+        if existing_vote:
+            if existing_vote.vote != vote:
+                existing_vote.vote = vote
+                existing_vote.save()
+        else:
+            PresenceVote.objects.create(location_id=location, user_id=user, vote=vote)
+
+        return Response({'message': 'Голос засчитан'}, status=200)
+    
+
+class PresenceStatsAPIView(APIView):
+    def get(self, request, location_id):
+        present_count = PresenceVote.objects.filter(location_id=location_id, vote='present').count()
+        absent_count = PresenceVote.objects.filter(location_id=location_id, vote='absent').count()
+
+        return Response({
+            'present': present_count,
+            'absent': absent_count
+        })
+
     
 class PhotoListView(ListAPIView):
     serializer_class = PhotoSerializer
@@ -61,3 +83,15 @@ class MultiPhotoUploadAPIView(APIView):
 
         serializer = PhotoSerializer(photos, many=True)
         return Response(serializer.data, status=201)
+
+
+
+class PhotoUploadView(APIView):
+    parser_classes = [MultiPartParser]
+
+    def post(self, request):
+        serializer = PhotoSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
