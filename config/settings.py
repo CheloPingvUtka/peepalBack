@@ -165,3 +165,14 @@ AWS_DEFAULT_ACL = 'public-read'
 # Настройки django-storages
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 AWS_QUERYSTRING_AUTH = False  # ссылки без временной подписи, публичные
+
+
+
+# Для сессионной авторизации между доменами (localhost:5173 → 8000)
+CORS_ALLOW_CREDENTIALS = True
+
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SECURE = False
+
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SECURE = False

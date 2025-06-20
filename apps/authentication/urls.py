@@ -11,4 +11,5 @@ urlpatterns = [
     path('activate/<uidb64>/<token>/', views.activate, name='activate'), 
     path('change/<uidb64>/<token>/', views.change, name='change'),  
     path('protected/', views.protected_view, name='protected-route'), 
+    path('me/', views.current_user_view, name='current-user'),
 ]

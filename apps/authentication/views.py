@@ -14,6 +14,18 @@ from django.contrib.auth.tokens import default_token_generator
 from django.urls import reverse
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+
+
+@login_required
+def current_user_view(request):
+    user = request.user
+    return JsonResponse({
+        'id': user.id,
+        'username': user.username,
+        'email': user.email,
+        'is_authenticated': True,
+    })
 
 @login_required
 def protected_view(request):
@@ -101,7 +113,8 @@ def signup_view(request):
 
             # Add print statement for debugging before redirect
             print("Redirecting to home page...")
-            return redirect('home')  # Here is where the redirect happens
+            next_param = request.GET.get('next', '')
+            return redirect(f'http://localhost:5173/auth-success?next={next_param}')
 
         else:
             messages.error(request, "Passwords do not match.")
@@ -126,7 +139,8 @@ def login_view(request):
             username = user.username
             request.session['is_authenticated'] = True
             request.session['username'] = username
-            return redirect('home')
+            next_param = request.GET.get('next', '')
+            return redirect(f'http://localhost:5173/auth-success?next={next_param}')
         else:
             # If authentication fails, display an error message and redirect to the home page
             messages.error(request, "Bad Credentials!")
