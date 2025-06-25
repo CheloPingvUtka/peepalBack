@@ -9,6 +9,16 @@ from .serializers import PhotoSerializer, ReviewSerializer, PresenceVoteSerializ
 from .models import Review
 from rest_framework.decorators import api_view
 from django.db.models import Prefetch
+from rest_framework.permissions import IsAuthenticated
+
+
+class UserReviewListView(ListAPIView):
+    serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Review.objects.filter(user=self.request.user).exclude(location__user=self.request.user).select_related('location')
+
 
 @api_view(['GET'])
 def get_reviews_by_location(request, location_id):

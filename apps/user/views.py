@@ -11,7 +11,7 @@ from apps.location.models import Location
 def user_stats(request):
     user = request.user
 
-    reviews_count = Review.objects.filter(user=user).count()
+    reviews_count = Review.objects.filter(user=user).exclude(location__user=user).count()
     pending_locations_count = Location.objects.filter(user=user, status='pending').count()
 
     return Response({

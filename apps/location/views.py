@@ -3,6 +3,9 @@ from django.db.models import Q
 from django.db.models import Count
 from .models import LocationCategory, Location, LocationChange, Filter, LocationFilter
 from .serializers import LocationCategorySerializer, LocationSerializer, LocationChangeSerializer, FilterSerializer, LocationFilterSerializer
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
 
 class LocationCategoryViewSet(ModelViewSet):
@@ -21,15 +24,18 @@ class LocationViewSet(ModelViewSet):
             queryset = queryset.filter(category_id=category)
 
         if filters:
-            # Преобразуем в числа (на всякий случай)
             filter_ids = list(map(int, filters))
-
-            # Находим локации, у которых есть все нужные фильтры
             queryset = queryset.annotate(
                 matched_filters=Count('locationfilter', filter=Q(locationfilter__filter_id__in=filter_ids), distinct=True)
             ).filter(matched_filters=len(filter_ids))
 
         return queryset.distinct()
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def by_user(self, request):
+        user_locations = Location.objects.filter(user=request.user)
+        serializer = self.get_serializer(user_locations, many=True)
+        return Response(serializer.data)
 
 class LocationChangeViewSet(ModelViewSet):
     queryset = LocationChange.objects.all()
