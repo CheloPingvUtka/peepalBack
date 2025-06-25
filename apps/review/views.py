@@ -10,6 +10,8 @@ from .models import Review
 from rest_framework.decorators import api_view
 from django.db.models import Prefetch
 from rest_framework.permissions import IsAuthenticated
+from django.db.models import Count, Q, F
+from apps.location.models import Location
 
 
 class UserReviewListView(ListAPIView):
@@ -34,7 +36,7 @@ class ReviewCreateAPIView(APIView):
             serializer.save()
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
-    
+
 
 class PresenceVoteAPIView(APIView):
     def post(self, request):
@@ -53,6 +55,13 @@ class PresenceVoteAPIView(APIView):
                 existing_vote.save()
         else:
             PresenceVote.objects.create(location_id=location, user_id=user, vote=vote)
+
+        # После голосования — проверяем стоит ли отклонить локацию
+        present_count = PresenceVote.objects.filter(location_id=location, vote='present').count()
+        absent_count = PresenceVote.objects.filter(location_id=location, vote='absent').count()
+
+        if absent_count >= 5 or (absent_count > 0 and present_count < absent_count * 2):
+            Location.objects.filter(id=location).update(status='rejected')
 
         return Response({'message': 'Голос засчитан'}, status=200)
     

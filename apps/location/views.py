@@ -8,20 +8,20 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 
-class LocationCategoryViewSet(ModelViewSet):
-    queryset = LocationCategory.objects.all()
-    serializer_class = LocationCategorySerializer
-
 class LocationViewSet(ModelViewSet):
     serializer_class = LocationSerializer
 
     def get_queryset(self):
-        queryset = Location.objects.all()
+        queryset = Location.objects.filter(status__in=['pending', 'approved'])
+
+        # Фильтрация по категории
         category = self.request.query_params.get('category')
-        filters = self.request.query_params.getlist('filters')
 
         if category:
             queryset = queryset.filter(category_id=category)
+
+        # Фильтрация по фильтрам
+        filters = self.request.query_params.getlist('filters')
 
         if filters:
             filter_ids = list(map(int, filters))
@@ -36,6 +36,11 @@ class LocationViewSet(ModelViewSet):
         user_locations = Location.objects.filter(user=request.user)
         serializer = self.get_serializer(user_locations, many=True)
         return Response(serializer.data)
+
+
+class LocationCategoryViewSet(ModelViewSet):
+    queryset = LocationCategory.objects.all()
+    serializer_class = LocationCategorySerializer
 
 class LocationChangeViewSet(ModelViewSet):
     queryset = LocationChange.objects.all()
