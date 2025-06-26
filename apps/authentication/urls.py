@@ -1,5 +1,7 @@
 from django.urls import path
 from . import views
+from .views import public_user_info
+
 
 urlpatterns = [
     path('', views.home, name='home'),  
@@ -12,4 +14,5 @@ urlpatterns = [
     path('change/<uidb64>/<token>/', views.change, name='change'),  
     path('protected/', views.protected_view, name='protected-route'), 
     path('me/', views.current_user_view, name='current-user'),
+    path('public/<int:user_id>/', public_user_info),
 ]

@@ -15,6 +15,42 @@ from django.urls import reverse
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+# apps.authentication.views.py
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from django.contrib.auth import get_user_model
+from apps.review.models import Review
+from apps.location.models import Location
+
+User = get_user_model()
+
+@api_view(['GET'])
+def public_user_info(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+
+        # Отзывы, исключая автоматические (где location.user = сам user)
+        reviews_count = Review.objects.filter(user_id=user.id).exclude(location__user_id=user.id).count()
+
+        # Только вручную созданные локации
+        locations_count = Location.objects.filter(user_id=user.id).count()
+
+        return Response({
+            'username': user.username,
+            'email': user.email,
+            'phone': getattr(user, 'phone', None),
+            'reviews_count': reviews_count,
+            'locations_count': locations_count,
+        })
+
+    except User.DoesNotExist:
+        return Response({'detail': 'Пользователь не найден'}, status=404)
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return Response({'detail': 'Внутренняя ошибка сервера'}, status=500)
 
 
 @login_required
