@@ -14,6 +14,10 @@ db.sqlite3
 media
 *.sqlite3
 
+**/migrations/*.py
+**/migrations/*.pyc
+!**/migrations/__init__.py
+
 # Environments
 .env
 venv/

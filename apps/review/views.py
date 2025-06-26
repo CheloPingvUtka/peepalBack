@@ -14,6 +14,13 @@ from django.db.models import Count, Q, F
 from apps.location.models import Location
 
 
+@api_view(['GET'])
+def public_reviews_by_user(request, user_id):
+    reviews = Review.objects.filter(user_id=user_id).exclude(location__user_id=user_id).select_related('location')
+    serializer = ReviewSerializer(reviews, many=True)
+    return Response(serializer.data)
+
+
 class UserReviewListView(ListAPIView):
     serializer_class = ReviewSerializer
     permission_classes = [IsAuthenticated]

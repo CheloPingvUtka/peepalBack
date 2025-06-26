@@ -36,6 +36,13 @@ class LocationViewSet(ModelViewSet):
         user_locations = Location.objects.filter(user=request.user)
         serializer = self.get_serializer(user_locations, many=True)
         return Response(serializer.data)
+    
+
+    @action(detail=False, methods=['get'], url_path='public/by-user/(?P<user_id>[^/.]+)')
+    def public_by_user(self, request, user_id=None):
+        locations = Location.objects.filter(user_id=user_id)
+        serializer = self.get_serializer(locations, many=True)
+        return Response(serializer.data)
 
 
 class LocationCategoryViewSet(ModelViewSet):
