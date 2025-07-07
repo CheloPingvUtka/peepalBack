@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import psycopg2
+import os
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,7 +28,7 @@ SECRET_KEY = 'django-insecure-*dc(g()wj-isn0(!kf1=x_5t=m422o!e$wxqeqr4h5)65$#l5$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['peepal.ru', 'www.peepal.ru']
 
 
 # Application definition
@@ -92,7 +94,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'PeePal',
-        'USER': 'postgres',
+        'USER': 'admin',
         'PASSWORD': 'rootroot',
         'HOST': 'localhost',
         'PORT': '5432',
@@ -100,12 +102,14 @@ DATABASES = {
 }
 
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com' 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = ''  
-EMAIL_HOST_PASSWORD = ''  
+EMAIL_HOST_USER = 'PheloUtka@ya.ru'
+EMAIL_HOST_PASSWORD = 'gerhzjatcrxsktsc'
+DEFAULT_FROM_EMAIL = 'PeePal <PheloUtka@ya.ru>'
+
 
 AUTH_USER_MODEL = 'user.User'
 
@@ -150,6 +154,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 CORS_ALLOWED_ORIGINS = [
+    "https://peepal.ru",
+    "https://www.peepal.ru",
     "http://localhost:5173",
 ]
 
@@ -171,8 +177,10 @@ AWS_QUERYSTRING_AUTH = False  # ссылки без временной подп�
 # Для сессионной авторизации между доменами (localhost:5173 → 8000)
 CORS_ALLOW_CREDENTIALS = True
 
-SESSION_COOKIE_SAMESITE = 'Lax'
-SESSION_COOKIE_SECURE = False
+SESSION_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SECURE = True
 
-CSRF_COOKIE_SAMESITE = 'Lax'
-CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SECURE = True
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

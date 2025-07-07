@@ -1,9 +1,7 @@
 {% autoescape off %}
+    Здравствуйте, {{ name }}!
 
-    Welcome to - Django Login!
-    Hello {{ name }}!
-    Please confirm your email by clicking on the following link.
-
-    Confirmation Link: http://{{ domain }}{% url 'activate' uidb64=uid token=token %} 
-
- {% endautoescape %}
+    Пожалуйста, подтвердите свой email, перейдя по следующей ссылке:
+    
+    https://peepal.ru{% url 'activate' uidb64=uid token=token %}
+{% endautoescape %}

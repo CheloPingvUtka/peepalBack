@@ -7,7 +7,7 @@ from django.conf import settings
 from django.core.mail import send_mail, EmailMessage
 from django.template.loader import render_to_string
 from django.contrib.sites.shortcuts import get_current_site
-from . tokens import generate_token
+from .tokens import generate_token
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
@@ -15,7 +15,6 @@ from django.urls import reverse
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-# apps.authentication.views.py
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -30,10 +29,10 @@ def public_user_info(request, user_id):
     try:
         user = User.objects.get(id=user_id)
 
-        # Отзывы, исключая автоматические (где location.user = сам user)
+        # Количество отзывов, кроме автоматических (где location.user = сам пользователь)
         reviews_count = Review.objects.filter(user_id=user.id).exclude(location__user_id=user.id).count()
 
-        # Только вручную созданные локации
+        # Только вручную добавленные локации
         locations_count = Location.objects.filter(user_id=user.id).count()
 
         return Response({
@@ -91,106 +90,83 @@ def signup_view(request):
         password2 = request.POST['password2']
         email = request.POST['email']
 
-        # Check if the username already exists
         if User.objects.filter(username=username):
-            messages.error(request, "Username already exist! Please try some other username.")
+            messages.error(request, "Имя пользователя уже существует! Попробуйте другое.")
             return redirect('home')
         
-        # Check if the email is already registered
         if User.objects.filter(email=email).exists():
-            messages.error(request, "Email Already Registered!!")
+            messages.error(request, "Этот email уже зарегистрирован!")
             return redirect('home')
         
-        # Check if the username is longer than 20 characters
         if len(username) > 20:
-            messages.error(request, "Username must be under 20 characters!!")
+            messages.error(request, "Имя пользователя не должно превышать 20 символов!")
             return redirect('home')
         
-        # Check if the passwords match
         if password1 != password2:
-            messages.error(request, "Passwords didn't match!!")
+            messages.error(request, "Пароли не совпадают!")
             return redirect('home')
         
-        # Check if the username is alphanumeric
         if not username.isalnum():
-            messages.error(request, "Username must be Alpha-Numeric!!")
+            messages.error(request, "Имя пользователя должно состоять только из букв и цифр!")
             return redirect('home')
 
-        # If the passwords match, create a new user
         if password1 == password2:
             myuser = User.objects.create_user(username, email, password1)
             myuser.is_active = False
             myuser.save()
-            messages.success(request, "Your account has been successfully created! Please check your email to confirm your email address and activate your account.")
-  
-            # Send confirmation email
-            subject = "Welcome to PeePal!"
-            message = f"Hello {myuser.username}!\nThank you for visiting our website. We have also sent you a confirmation email, please confirm your email address."
-            from_email = settings.EMAIL_HOST_USER
-            to_list = [myuser.email]
-            send_mail(subject, message, from_email, to_list, fail_silently=True)
-            
+            messages.success(request, "Аккаунт успешно создан! Проверьте почту для активации.")
+
             current_site = get_current_site(request)
-            email_subject = "Confirm your Email - Django Login!"
+            email_subject = "Подтверждение регистрации на PeePal"
             message2 = render_to_string('authentication/email_confirmation.html', {
                 'name': myuser.username,
-                'domain': current_site.domain,
+                'domain': 'peepal.ru',
                 'uid': urlsafe_base64_encode(force_bytes(myuser.pk)),
                 'token': generate_token.make_token(myuser)
             })
             email = EmailMessage(
                 email_subject,
                 message2,
-                settings.EMAIL_HOST_USER,
+                settings.DEFAULT_FROM_EMAIL,
                 [myuser.email],
             )
-            email.fail_silently = True
+            email.fail_silently = False
             email.send()
 
-            # Add print statement for debugging before redirect
-            print("Redirecting to home page...")
             next_param = request.GET.get('next', '')
-            return redirect(f'http://localhost:5173/auth-success?next={next_param}')
+            return redirect(f'https://peepal.ru/auth-success?next={next_param}')
 
         else:
-            messages.error(request, "Passwords do not match.")
+            messages.error(request, "Пароли не совпадают.")
             return redirect('auth', form_type='signup')
     else:
         return render(request, "authentication/auth.html", {'form_type': 'signup'})
 
 
 def login_view(request):
-    # Get the username and password from the request
     if request.method == "POST":
         username = request.POST['user-login']
         password = request.POST['password']
 
-        # Authenticate the user
         user = authenticate(username=username, password=password)
 
-        # If the user is authenticated
         if user is not None:
-            # Log in the user
             login(request, user)
             username = user.username
             request.session['is_authenticated'] = True
             request.session['username'] = username
             next_param = request.GET.get('next', '')
-            return redirect(f'http://localhost:5173/auth-success?next={next_param}')
+            return redirect(f'https://peepal.ru/auth-success?next={next_param}')
         else:
-            # If authentication fails, display an error message and redirect to the home page
-            messages.error(request, "Bad Credentials!")
+            messages.error(request, "Неверные данные для входа!")
             return redirect('home')
     
-    # If the request method is not POST, render the login template
     return render(request, 'authentication/auth.html', {'form_type': 'login'})
 
 
 def signout(request):
-    # Log out the user
     logout(request)
-
-    messages.success(request, "Logged Out Successfully!")
+    messages.success(request, "Вы вышли из системы.")
     return redirect('home')
 
 
@@ -202,29 +178,27 @@ def forgot(request):
             try:
                 user = User.objects.get(email=email)
 
-                # Генерируем ссылку для сброса пароля
                 uid = urlsafe_base64_encode(force_bytes(user.pk))
                 token = default_token_generator.make_token(user)
                 current_site = get_current_site(request)
                 reset_url = reverse('change', kwargs={'uidb64': uid, 'token': token})
                 reset_link = f'http://{current_site.domain}{reset_url}'
 
-                # Отправка email с ссылкой для сброса пароля
-                mail_subject = 'Password Reset'
+                mail_subject = 'Сброс пароля'
                 message = render_to_string('authentication/reset_password_email.html', {
                     'user': user,
                     'reset_link': reset_link,
                 })
                 user.email_user(mail_subject, message)
 
-                messages.success(request, "The password reset email has been sent successfully.")
+                messages.success(request, "Письмо для сброса пароля успешно отправлено.")
                 return redirect('home')
 
             except User.DoesNotExist:
-                messages.error(request, "Sorry, the user with this email address is not registered.")
+                messages.error(request, "Пользователь с таким email не зарегистрирован.")
                 return redirect('home')
         else:
-            messages.error(request, "Please try to enter a valid email address next time.")
+            messages.error(request, "Введите корректный адрес электронной почты.")
             return redirect('home')
     
     return render(request, "authentication/forgot.html")
@@ -240,44 +214,42 @@ def change(request, uidb64, token):
                 password2 = request.POST.get('password2')
 
                 if password1 and password2 and password1 == password2:
-                    # Устанавливаем новый пароль для пользователя
                     user.password = make_password(password1)
                     user.save()
-                    messages.success(request, f"Password changed successfully for user: {user.username}")
+                    messages.success(request, f"Пароль успешно изменён для пользователя: {user.username}")
                     return redirect('home')
                 else:
-                    messages.error(request, "Passwords do not match or some fields are empty. Please try again.")
+                    messages.error(request, "Пароли не совпадают или поля не заполнены.")
                     return redirect('home')
             else:
                 return render(request, "authentication/change_password.html", {'user': user, 'uidb64': uidb64, 'token': token})
         else:
-            messages.error(request, "The password reset link is no longer valid.")
+            messages.error(request, "Ссылка для сброса пароля недействительна.")
             return redirect('home')
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-        messages.error(request, "The password reset link is no longer valid.")
+        messages.error(request, "Ссылка для сброса пароля недействительна.")
         return redirect('home')
 
 
 def activate(request, uidb64, token):
     try:
-        # Декодируем id и проверяем токен
         uid = urlsafe_base64_decode(uidb64).decode()
         user = User.objects.get(pk=uid)
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-        messages.error(request, "Invalid activation link.")
-        return redirect('home')  # Возвращаем на главную, если активация не удалась
+        messages.error(request, "Недопустимая ссылка активации.")
+        return redirect('home')
 
     if generate_token.check_token(user, token):
         user.is_active = True
         user.save()
         login(request, user)
-        messages.success(request, "Your account has been activated!")
-        return redirect('home')  # Перенаправление на главную страницу после успешной активации
+        messages.success(request, "Ваш аккаунт был успешно активирован!")
+        return redirect('home')
     else:
-        messages.error(request, "Activation link is invalid or expired.")
-        return redirect('home')  # Возвращаем на главную, если токен неверный
+        messages.error(request, "Ссылка активации недействительна или устарела.")
+        return redirect('home')
+
 
 @login_required
 def dashboard_home(request):
     return render(request, 'home.html')
-    

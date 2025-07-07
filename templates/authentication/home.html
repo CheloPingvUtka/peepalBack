@@ -1,7 +1,7 @@
 {% if user.is_authenticated %}
-    <p>Welcome, {{ user.username }}!</p>
-    <a href="{% url 'signout' %}">Logout</a>
+    <p>Добро пожаловать, {{ user.username }}!</p>
+    <a href="{% url 'signout' %}">Выйти</a>
 {% else %}
-    <a href="{% url 'login' %}">Login</a>
-    <a href="{% url 'signup' %}">Sign Up</a>
+    <a href="{% url 'login' %}">Войти</a>
+    <a href="{% url 'signup' %}">Регистрация</a>
 {% endif %}

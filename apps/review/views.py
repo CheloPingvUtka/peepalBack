@@ -12,6 +12,12 @@ from django.db.models import Prefetch
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Count, Q, F
 from apps.location.models import Location
+from PIL import Image
+import io
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from pillow_heif import register_heif_opener
+
+register_heif_opener()
 
 
 @api_view(['GET'])
@@ -67,7 +73,7 @@ class PresenceVoteAPIView(APIView):
         present_count = PresenceVote.objects.filter(location_id=location, vote='present').count()
         absent_count = PresenceVote.objects.filter(location_id=location, vote='absent').count()
 
-        if absent_count >= 5 or (absent_count > 0 and present_count < absent_count * 2):
+        if absent_count >= 3:
             Location.objects.filter(id=location).update(status='rejected')
 
         return Response({'message': 'Голос засчитан'}, status=200)
@@ -101,13 +107,32 @@ class MultiPhotoUploadAPIView(APIView):
     def post(self, request):
         location_id = request.data.get('location')
         review_id = request.data.get('review')
+        files = request.FILES.getlist('images')
 
-        files = request.FILES.getlist('images')  # <-- ожидаем ключ 'images'
         if not files:
             return Response({'error': 'No files provided.'}, status=400)
 
         photos = []
+
         for file in files:
+            if file.name.lower().endswith('.heic'):
+                # Конвертация HEIC → JPEG
+                image = Image.open(file)
+                rgb_image = image.convert('RGB')
+
+                output_io = io.BytesIO()
+                rgb_image.save(output_io, format='JPEG')
+                output_io.seek(0)
+
+                file = InMemoryUploadedFile(
+                    output_io,
+                    field_name='image',
+                    name=file.name.rsplit('.', 1)[0] + '.jpg',
+                    content_type='image/jpeg',
+                    size=output_io.getbuffer().nbytes,
+                    charset=None
+                )
+
             photo = Photo(
                 image=file,
                 location_id=location_id,
@@ -118,7 +143,6 @@ class MultiPhotoUploadAPIView(APIView):
 
         serializer = PhotoSerializer(photos, many=True)
         return Response(serializer.data, status=201)
-
 
 
 class PhotoUploadView(APIView):

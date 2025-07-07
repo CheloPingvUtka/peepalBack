@@ -3,6 +3,8 @@ from .models import Location, LocationCategory, LocationChange, Filter, Location
 from apps.user.models import User  # проверь, что путь правильный
 
 
+
+
 class LocationCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = LocationCategory
@@ -98,3 +100,17 @@ class FilterShortSerializer(serializers.ModelSerializer):
     class Meta:
         model = Filter
         fields = ['id', 'filter_name']
+
+
+class LocationLightSerializer(serializers.ModelSerializer):
+    category = LocationCategorySerializer(read_only=True)
+    filters = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Location
+        fields = ['id', 'latitude', 'longitude', 'category', 'filters']
+
+    def get_filters(self, obj):
+        return FilterShortSerializer(
+            Filter.objects.filter(locationfilter__location=obj), many=True
+        ).data

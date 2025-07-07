@@ -1,4 +1,3 @@
-<!-- templates/authentication/forgot.html -->
 {% load static %}
 
 <html>
@@ -11,9 +10,9 @@
       <div class="forgot-html">
         <form method="POST">
           {% csrf_token %}
-          <label for="email">Enter your email:</label>
+          <label for="email">Введите ваш email:</label>
           <input type="email" id="email" name="pass-forgot" required>
-          <button type="submit">Send Password Reset Email</button>
+          <button type="submit">Отправить письмо для сброса пароля</button>
         </form>
       </div>
     </div>
